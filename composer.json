@@ -1,0 +1,52 @@
+{
+    "name": "padosoft/laravel-permission-extended",
+    "description": "Extension of spatie/laravel-permission with event firing when permissions or roles are assigned or removed",
+    "keywords": [
+        "padosoft",
+        "laravel",
+        "permission",
+        "acl",
+        "security"
+    ],
+    "homepage": "https://github.com/padosoft/laravel-permission-extended",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Leonardo Padovani",
+            "email": "helpdesk@padosoft.com",
+            "homepage": "https://www.padosoft.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "spatie/laravel-permission": "^2.37"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.2",
+        "orchestra/testbench": "^3.8",
+        "mockery/mockery": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Padosoft\\Laravel\\PermissionExtended\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Padosoft\\Laravel\\PermissionExtended\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Padosoft\\Laravel\\PermissionExtended\\PermissionExtendedServiceProvider"
+            ]
+        }
+    }
+}
