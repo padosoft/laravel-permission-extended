@@ -5,9 +5,9 @@
 
 namespace Padosoft\Laravel\PermissionExtended\Test;
 
-use Spatie\Permission\Models\Role;
+use Padosoft\Laravel\PermissionExtended\Models\Role;
 use Illuminate\Support\Facades\Event;
-use Spatie\Permission\Models\Permission;
+use Padosoft\Laravel\PermissionExtended\Models\Permission;
 use Padosoft\Laravel\PermissionExtended\Events\RoleRevoked;
 use Padosoft\Laravel\PermissionExtended\Events\RoleSynched;
 use Padosoft\Laravel\PermissionExtended\Events\RoleAssigned;
@@ -59,6 +59,7 @@ class EventTest extends TestCase
         $perm = Permission::create(['name' => 'other-permission2']);
         $perm->disablePermissionEvents();
         $perm = $perm->syncRoles('testRole');
+        $perm->save();
         Event::assertNotDispatched(PermissionAssigned::class);
         $perm->enablePermissionEvents();
         $perm = $perm->syncRoles('testRole2');
@@ -86,7 +87,7 @@ class EventTest extends TestCase
     public function it_fires_an_event_on_permission_assigned_to_user()
     {
         Event::fake();
-
+        $this->testUser->enablePermissionEvents();
         $this->testUser->givePermissionTo('other-permission');
         $user = $this->testUser;
         Event::assertDispatched(PermissionAssigned::class, function ($event) use ($user) {

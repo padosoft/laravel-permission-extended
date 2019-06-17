@@ -3,7 +3,7 @@
 namespace Padosoft\Laravel\PermissionExtended\Test;
 
 use Illuminate\Auth\Authenticatable;
-use Spatie\Permission\Traits\HasRoles;
+use Padosoft\Laravel\PermissionExtended\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
