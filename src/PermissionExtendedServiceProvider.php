@@ -8,7 +8,7 @@ class PermissionExtendedServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        if (isNotLumen()) {
+        if (function_exists('config_path')) { // function not available and 'publish' not relevant in Lumen
             $this->publishes([
                 __DIR__ . '/../config/permission-extended.php' => config_path('permission-extended.php'),
             ], 'config');
@@ -18,12 +18,11 @@ class PermissionExtendedServiceProvider extends ServiceProvider
 
     public function register()
     {
-        if (isNotLumen()) {
-            $this->mergeConfigFrom(
-                __DIR__ . '/../config/permission-extended.php',
-                'permission-extended'
-            );
-        }
+
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/permission-extended.php',
+            'permission-extended'
+        );
 
 
     }
