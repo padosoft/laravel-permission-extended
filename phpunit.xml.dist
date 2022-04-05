@@ -10,13 +10,13 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="League Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Padosoft Test Suite">
+            <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
+    <logging>
+        <text outputFile="./build/phpunit_logfile.txt"/>
+        <junit outputFile="./build/phpunit_junit.xml"/>
+        <teamcity outputFile="./build/phpunit_teamcity.txt"/>
+    </logging>
 </phpunit>
