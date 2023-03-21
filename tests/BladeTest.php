@@ -28,11 +28,11 @@ class BladeTest extends TestCase
         $roles = [$role];
 
         $this->assertEquals('does not have permission', $this->renderView('can', ['permission' => $permission]));
-        $this->assertEquals('does not have role', $this->renderView('role', [$role]));
-        $this->assertEquals('does not have role', $this->renderView('hasRole', [$role]));
-        $this->assertEquals('does not have all of the given roles', $this->renderView('hasAllRoles', $roles));
+        $this->assertEquals('does not have role', $this->renderView('role', ['role'=>$role]));
+        $this->assertEquals('does not have role', $this->renderView('hasRole', ['role'=>$role]));
+        $this->assertEquals('does not have all of the given roles', $this->renderView('hasAllRoles', ['roles'=>$roles]));
         $this->assertEquals('does not have all of the given roles', $this->renderView('hasAllRoles', ['roles' => implode('|', $roles)]));
-        $this->assertEquals('does not have any of the given roles', $this->renderView('hasAnyRole', $roles));
+        $this->assertEquals('does not have any of the given roles', $this->renderView('hasAnyRole', ['roles' =>$roles]));
         $this->assertEquals('does not have any of the given roles', $this->renderView('hasAnyRole', ['roles' => implode('|', $roles)]));
     }
 
