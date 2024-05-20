@@ -2,6 +2,7 @@
 
 namespace Padosoft\Laravel\PermissionExtended\Traits;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Contracts\Role;
@@ -235,14 +236,10 @@ trait HasRoles
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeRole(Builder $query, $roles, $guard = null): Builder
+    public function scopeRole(Builder $query, $roles, $guard = null, $without = false): Builder
     {
         if ($roles instanceof Collection) {
             $roles = $roles->all();
-        }
-
-        if (!is_array($roles)) {
-            $roles = [$roles];
         }
 
         $roles = array_map(function ($role) use ($guard) {
@@ -250,19 +247,20 @@ trait HasRoles
                 return $role;
             }
 
-            $method = is_numeric($role) ? 'findById' : 'findByName';
-            $guard = $guard ?: $this->getDefaultGuardName();
+            if ($role instanceof \BackedEnum) {
+                $role = $role->value;
+            }
 
-            return $this->getRoleClass()->{$method}($role, $guard);
-        }, $roles);
+            $method = is_int($role) || PermissionRegistrar::isUid($role) ? 'findById' : 'findByName';
 
-        return $query->whereHas('roles', function ($query) use ($roles) {
-            $query->where(function ($query) use ($roles) {
-                foreach ($roles as $role) {
-                    $query->orWhere(config('permission.table_names.roles') . '.id', $role->id);
-                }
-            });
-        });
+            return $this->getRoleClass()::{$method}($role, $guard ?: $this->getDefaultGuardName());
+        }, Arr::wrap($roles));
+
+        $key = (new ($this->getRoleClass())())->getKeyName();
+
+        return $query->{! $without ? 'whereHas' : 'whereDoesntHave'}('roles', fn (Builder $subQuery) => $subQuery
+            ->whereIn(config('permission.table_names.roles').".$key", \array_column($roles, $key))
+        );
     }
 
     /**
@@ -438,14 +436,16 @@ trait HasRoles
 
     protected function getStoredRole($role): Role
     {
-        $roleClass = $this->getRoleClass();
+        if ($role instanceof \BackedEnum) {
+            $role = $role->value;
+        }
 
-        if (is_numeric($role)) {
-            return $roleClass->findById($role, $this->getDefaultGuardName());
+        if (is_int($role) || PermissionRegistrar::isUid($role)) {
+            return $this->getRoleClass()::findById($role, $this->getDefaultGuardName());
         }
 
         if (is_string($role)) {
-            return $roleClass->findByName($role, $this->getDefaultGuardName());
+            return $this->getRoleClass()::findByName($role, $this->getDefaultGuardName());
         }
 
         return $role;
