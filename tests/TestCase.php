@@ -103,9 +103,9 @@ abstract class TestCase extends Orchestra
             $table->string('email');
         });
 
-        $migrations= require __DIR__.'/../vendor/spatie/laravel-permission/database/migrations/create_permission_tables.php.stub';
+        include_once __DIR__.'/../vendor/spatie/laravel-permission/database/migrations/create_permission_tables.php.stub';
 
-        $migrations->up();
+        (new \CreatePermissionTables())->up();
 
         User::create(['email' => 'test@user.com']);
         Admin::create(['email' => 'admin@user.com']);
