@@ -78,27 +78,27 @@ class Role extends Model implements RoleContract
      *
      * @throws \Spatie\Permission\Exceptions\RoleDoesNotExist
      */
-    public static function findByName(string $name, $guardName = null): RoleContract
+    public static function findByName(string $name, ?string $guardName = null): RoleContract
     {
         $guardName = $guardName ?? Guard::getDefaultName(static::class);
 
         $role = static::where('name', $name)->where('guard_name', $guardName)->first();
 
         if (! $role) {
-            throw RoleDoesNotExist::named($name);
+            throw RoleDoesNotExist::named($name,$guardName);
         }
 
         return $role;
     }
 
-    public static function findById(int $id, $guardName = null): RoleContract
+    public static function findById(string|int $id, ?string$guardName = null): RoleContract
     {
         $guardName = $guardName ?? Guard::getDefaultName(static::class);
 
         $role = static::where('id', $id)->where('guard_name', $guardName)->first();
 
         if (! $role) {
-            throw RoleDoesNotExist::withId($id);
+            throw RoleDoesNotExist::withId($id,$guardName);
         }
 
         return $role;
@@ -134,22 +134,18 @@ class Role extends Model implements RoleContract
      *
      * @throws \Spatie\Permission\Exceptions\GuardDoesNotMatch
      */
-    public function hasPermissionTo($permission): bool
+    public function hasPermissionTo($permission,?string $guardName = null): bool
     {
-        $permissionClass = $this->getPermissionClass();
-
-        if (is_string($permission)) {
-            $permission = $permissionClass->findByName($permission, $this->getDefaultGuardName());
+        if ($this->getWildcardClass()) {
+            return $this->hasWildcardPermission($permission, $guardName);
         }
 
-        if (is_int($permission)) {
-            $permission = $permissionClass->findById($permission, $this->getDefaultGuardName());
-        }
+        $permission = $this->filterPermission($permission, $guardName);
 
         if (! $this->getGuardNames()->contains($permission->guard_name)) {
-            throw GuardDoesNotMatch::create($permission->guard_name, $this->getGuardNames());
+            throw GuardDoesNotMatch::create($permission->guard_name, $guardName ?? $this->getGuardNames());
         }
 
-        return $this->permissions->contains('id', $permission->id);
+        return $this->permissions->contains($permission->getKeyName(), $permission->getKey());
     }
 }

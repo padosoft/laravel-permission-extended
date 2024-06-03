@@ -59,7 +59,7 @@ class Permission  extends Model implements PermissionContract
     /**
      * A permission belongs to some users of the model associated with its guard.
      */
-    public function users(): MorphToMany
+    public function users(): BelongsToMany
     {
         return $this->morphedByMany(
             getModelForGuard($this->attributes['guard_name']),
@@ -68,27 +68,6 @@ class Permission  extends Model implements PermissionContract
             'permission_id',
             config('permission.column_names.model_morph_key')
         );
-    }
-
-    /**
-     * Find a permission by its name (and optionally guardName).
-     *
-     * @param string $name
-     * @param string|null $guardName
-     *
-     * @throws \Spatie\Permission\Exceptions\PermissionDoesNotExist
-     *
-     * @return \Spatie\Permission\Contracts\Permission
-     */
-    public static function findByName(string $name, $guardName = null): PermissionContract
-    {
-        $guardName = $guardName ?? Guard::getDefaultName(static::class);
-        $permission = static::getPermissions(['name' => $name, 'guard_name' => $guardName])->first();
-        if (! $permission) {
-            throw PermissionDoesNotExist::create($name, $guardName);
-        }
-
-        return $permission;
     }
 
     /**
@@ -101,7 +80,7 @@ class Permission  extends Model implements PermissionContract
      *
      * @return \Spatie\Permission\Contracts\Permission
      */
-    public static function findById(int $id, $guardName = null): PermissionContract
+    public static function findById(int|string $id, ?string $guardName = null): PermissionContract
     {
         $guardName = $guardName ?? Guard::getDefaultName(static::class);
         $permission = static::getPermissions(['id' => $id, 'guard_name' => $guardName])->first();
@@ -136,8 +115,31 @@ class Permission  extends Model implements PermissionContract
     /**
      * Get the current cached permissions.
      */
-    protected static function getPermissions(array $params = []): Collection
+    protected static function getPermissions(array $params = [], bool $onlyOne = false): \Illuminate\Database\Eloquent\Collection
     {
-        return app(PermissionRegistrar::class)->getPermissions($params);
+        return app(PermissionRegistrar::class)
+            ->setPermissionClass(static::class)
+            ->getPermissions($params, $onlyOne);
+    }
+
+    /**
+     * Find a permission by its name (and optionally guardName).
+     *
+     * @param string $name
+     * @param string|null $guardName
+     *
+     * @throws \Spatie\Permission\Exceptions\PermissionDoesNotExist
+     *
+     * @return \Spatie\Permission\Contracts\Permission
+     */
+    public static function findByName(string $name, $guardName = null): PermissionContract
+    {
+        $guardName = $guardName ?? Guard::getDefaultName(static::class);
+        $permission = static::getPermissions(['name' => $name, 'guard_name' => $guardName])->first();
+        if (! $permission) {
+            throw PermissionDoesNotExist::create($name, $guardName);
+        }
+
+        return $permission;
     }
 }
